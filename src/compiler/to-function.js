@@ -26,13 +26,14 @@ export function createCompileToFunctionFn (compile: Function): Function {
     options?: CompilerOptions,
     vm?: Component
   ): CompiledFunctionResult {
+    //合并参数
     options = extend({}, options)
     const warn = options.warn || baseWarn
     delete options.warn
 
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production') {
-      // detect possible CSP restriction
+      // detect possible CSP restriction CSP:内容安全策略
       try {
         new Function('return 1')
       } catch (e) {

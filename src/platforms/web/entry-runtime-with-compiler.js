@@ -15,6 +15,8 @@ const idToTemplate = cached(id => {
 })
 
 const mount = Vue.prototype.$mount
+//完整版
+//重写$mount template to render
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
@@ -33,6 +35,7 @@ Vue.prototype.$mount = function (
   // resolve template/el and convert to render function
   if (!options.render) {
     let template = options.template
+    // 优先取template,再去el.outerHTML
     if (template) {
       if (typeof template === 'string') {
         if (template.charAt(0) === '#') {
@@ -66,8 +69,8 @@ Vue.prototype.$mount = function (
         outputSourceRange: process.env.NODE_ENV !== 'production',
         shouldDecodeNewlines,
         shouldDecodeNewlinesForHref,
-        delimiters: options.delimiters,
-        comments: options.comments
+        delimiters: options.delimiters, //纯文本插入分割符
+        comments: options.comments //是否保留注释
       }, this)
       options.render = render
       options.staticRenderFns = staticRenderFns

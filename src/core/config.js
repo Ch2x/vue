@@ -11,12 +11,12 @@ import { LIFECYCLE_HOOKS } from 'shared/constants'
 export type Config = {
   // user
   optionMergeStrategies: { [key: string]: Function };
-  silent: boolean;
+  silent: boolean; //取消 Vue 所有的日志与警告。
   productionTip: boolean;
   performance: boolean;
   devtools: boolean;
   errorHandler: ?(err: Error, vm: Component, info: string) => void;
-  warnHandler: ?(msg: string, vm: Component, trace: string) => void;
+  warnHandler: ?(msg: string, vm: Component, trace: string) => void; //为 Vue 的运行时警告赋予一个自定义处理函数
   ignoredElements: Array<string | RegExp>;
   keyCodes: { [key: string]: number | Array<number> };
 
