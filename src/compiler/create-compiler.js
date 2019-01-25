@@ -60,7 +60,7 @@ export function createCompilerCreator (baseCompile: Function): Function {
 
       const compiled = baseCompile(template.trim(), finalOptions)
       if (process.env.NODE_ENV !== 'production') {
-        detectErrors(compiled.ast, warn)
+        detectErrors(compiled.ast, warn) //检测AST错误
       }
       compiled.errors = errors
       compiled.tips = tips

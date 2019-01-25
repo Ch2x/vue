@@ -61,6 +61,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     const compiled = compile(template, options)
 
     // check compilation errors/tips
+    //编译后的错误和提示信息
     if (process.env.NODE_ENV !== 'production') {
       if (compiled.errors && compiled.errors.length) {
         if (options.outputSourceRange) {

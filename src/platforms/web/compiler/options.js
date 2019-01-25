@@ -14,10 +14,10 @@ import { isUnaryTag, canBeLeftOpenTag } from './util'
 
 export const baseOptions: CompilerOptions = {
   expectHTML: true,
-  modules,
-  directives,
+  modules,  //[klass,style,model]
+  directives,  //{model,text,html}
   isPreTag,
-  isUnaryTag,
+  isUnaryTag, //是否一元标签
   mustUseProp,
   canBeLeftOpenTag,
   isReservedTag,
