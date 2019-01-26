@@ -26,11 +26,12 @@ import {
  * how to merge a parent option value and a child option
  * value into the final value.
  */
-const strats = config.optionMergeStrategies
+const strats = config.optionMergeStrategies //选项合并策略
 
 /**
  * Options with restrictions
  */
+//options prop and el strategies
 if (process.env.NODE_ENV !== 'production') {
   strats.el = strats.propsData = function (parent, child, vm, key) {
     if (!vm) {
@@ -143,6 +144,7 @@ strats.data = function (
 /**
  * Hooks and props are merged as arrays.
  */
+//合并生命周期函数
 function mergeHook (
   parentVal: ?Array<Function>,
   childVal: ?Function | ?Array<Function>
@@ -195,6 +197,12 @@ function mergeAssets (
   }
 }
 
+
+// [
+//   'component',
+//   'directive',
+//   'filter'
+// ]
 ASSET_TYPES.forEach(function (type) {
   strats[type + 's'] = mergeAssets
 })
@@ -261,6 +269,7 @@ strats.provide = mergeDataOrFn
 /**
  * Default strategy.
  */
+//默认策略，子空则父，子有则有
 const defaultStrat = function (parentVal: any, childVal: any): any {
   return childVal === undefined
     ? parentVal
@@ -297,25 +306,25 @@ export function validateComponentName (name: string) {
  */
 function normalizeProps (options: Object, vm: ?Component) {
   const props = options.props
-  if (!props) return
+  if (!props) return //无props返回
   const res = {}
   let i, val, name
-  if (Array.isArray(props)) {
+  if (Array.isArray(props)) { //judge array
     i = props.length
     while (i--) {
       val = props[i]
       if (typeof val === 'string') {
-        name = camelize(val)
+        name = camelize(val) //转为驼峰
         res[name] = { type: null }
       } else if (process.env.NODE_ENV !== 'production') {
         warn('props must be strings when using array syntax.')
       }
     }
-  } else if (isPlainObject(props)) {
+  } else if (isPlainObject(props)) { // Object
     for (const key in props) {
       val = props[key]
-      name = camelize(key)
-      res[name] = isPlainObject(val)
+      name = camelize(key) //转为驼峰
+      res[name] = isPlainObject(val) //是否对象
         ? val
         : { type: val }
     }
@@ -367,6 +376,7 @@ function normalizeDirectives (options: Object) {
       if (typeof def === 'function') {
         dirs[key] = { bind: def, update: def }
       }
+      //参数为function时，默认绑定bind和update
     }
   }
 }
@@ -391,16 +401,16 @@ export function mergeOptions (
   vm?: Component
 ): Object {
   if (process.env.NODE_ENV !== 'production') {
-    checkComponents(child)
+    checkComponents(child) //校验实例参数options.components  name
   }
 
   if (typeof child === 'function') {
-    child = child.options
+    child = child.options //problem
   }
 
-  normalizeProps(child, vm)
-  normalizeInject(child, vm)
-  normalizeDirectives(child)
+  normalizeProps(child, vm) //正常化props属性
+  normalizeInject(child, vm) //正常化inject属性
+  normalizeDirectives(child) //正常化directive属性
 
   // Apply extends and mixins on the child options,
   // but only if it is a raw options object that isn't
@@ -416,9 +426,10 @@ export function mergeOptions (
       }
     }
   }
-
+  //父子合并
   const options = {}
   let key
+  //遍历选项
   for (key in parent) {
     mergeField(key)
   }
@@ -427,6 +438,9 @@ export function mergeOptions (
       mergeField(key)
     }
   }
+  //合并选项，用户可以定义合并策略
+  //el、prop默认策略
+  //
   function mergeField (key) {
     const strat = strats[key] || defaultStrat
     options[key] = strat(parent[key], child[key], vm, key)

@@ -55,10 +55,12 @@ export function toRawType (value: any): string {
  * Strict object type check. Only returns true
  * for plain JavaScript objects.
  */
+//判断是否Object对象
 export function isPlainObject (obj: any): boolean {
   return _toString.call(obj) === '[object Object]'
 }
 
+//判断是否正则对象
 export function isRegExp (v: any): boolean {
   return _toString.call(v) === '[object RegExp]'
 }
@@ -143,6 +145,7 @@ export function remove (arr: Array<any>, item: any): Array<any> | void {
  * Check whether an object has the property.
  */
 const hasOwnProperty = Object.prototype.hasOwnProperty
+//获取自身属性 不获取原型上的
 export function hasOwn (obj: Object | Array<*>, key: string): boolean {
   return hasOwnProperty.call(obj, key)
 }
@@ -161,7 +164,7 @@ export function cached<F: Function> (fn: F): F {
 /**
  * Camelize a hyphen-delimited string.
  */
-const camelizeRE = /-(\w)/g
+const camelizeRE = /-(\w)/g //匹配符合后字符串首个字母大写
 export const camelize = cached((str: string): string => {
   return str.replace(camelizeRE, (_, c) => c ? c.toUpperCase() : '')
 })

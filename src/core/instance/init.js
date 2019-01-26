@@ -36,8 +36,24 @@ export function initMixin (Vue: Class<Component>) {
       // internal component options needs special treatment.
       initInternalComponent(vm, options)
     } else {
+      // Vue.options = {
+      //   components: {
+      //     KeepAlive
+      //     // Transition 和 TransitionGroup 组件在 runtime/index.js 文件中被添加
+      //     // Transition,
+      //       // TransitionGroup
+      //   },
+      //   directives: Object.create(null),
+      //   // 在 runtime/index.js 文件中，为 directives 添加了两个平台化的指令 model 和 show
+      //   // directives:{
+      //   //	model,
+      //     //	show
+      //   // },
+      //   filters: Object.create(null),
+      //   _base: Vue
+      // }
       vm.$options = mergeOptions(
-        resolveConstructorOptions(vm.constructor),
+        resolveConstructorOptions(vm.constructor), //Vue为构造函数直接 返回Vue.options
         options || {},
         vm
       )
