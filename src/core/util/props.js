@@ -28,8 +28,9 @@ export function validateProp (
   const absent = !hasOwn(propsData, key)
   let value = propsData[key]
   // boolean casting
-  const booleanIndex = getTypeIndex(Boolean, prop.type)
+  const booleanIndex = getTypeIndex(Boolean, prop.type) //判断传入类型是否包含Boolean
   if (booleanIndex > -1) {
+    //如果传入类型包含Boolean 并且不含默认值 则设置为false
     if (absent && !hasOwn(prop, 'default')) {
       value = false
     } else if (value === '' || value === hyphenate(key)) {
@@ -188,6 +189,7 @@ function isSameType (a, b) {
   return getType(a) === getType(b)
 }
 
+//expectedTypes类型可能为数组
 function getTypeIndex (type, expectedTypes): number {
   if (!Array.isArray(expectedTypes)) {
     return isSameType(expectedTypes, type) ? 0 : -1

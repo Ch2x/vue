@@ -180,6 +180,7 @@ export const capitalize = cached((str: string): string => {
  * Hyphenate a camelCase string.
  */
 const hyphenateRE = /\B([A-Z])/g
+// 驼峰转为'-'
 export const hyphenate = cached((str: string): string => {
   return str.replace(hyphenateRE, '-$1').toLowerCase()
 })

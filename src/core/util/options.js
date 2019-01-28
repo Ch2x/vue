@@ -47,13 +47,16 @@ if (process.env.NODE_ENV !== 'production') {
 /**
  * Helper that recursively merges two data objects together.
  */
+//to: child from: parent
 function mergeData (to: Object, from: ?Object): Object {
   if (!from) return to
   let key, toVal, fromVal
 
+  //hasSymbol
   const keys = hasSymbol
     ? Reflect.ownKeys(from)
     : Object.keys(from)
+
 
   for (let i = 0; i < keys.length; i++) {
     key = keys[i]
@@ -61,12 +64,18 @@ function mergeData (to: Object, from: ?Object): Object {
     if (key === '__ob__') continue
     toVal = to[key]
     fromVal = from[key]
-    if (!hasOwn(to, key)) {
+    // 四种情况
+    // to from
+    // 0    0
+    // 1    1
+    // 0    1
+    // 1    0
+    if (!hasOwn(to, key)) { //to不存在该Key 0 1
       set(to, key, fromVal)
     } else if (
       toVal !== fromVal &&
       isPlainObject(toVal) &&
-      isPlainObject(fromVal)
+      isPlainObject(fromVal) //1 1 都为对象
     ) {
       mergeData(toVal, fromVal)
     }
@@ -152,12 +161,12 @@ function mergeHook (
   const res = childVal
     ? parentVal
       ? parentVal.concat(childVal)
-      : Array.isArray(childVal)
+      : Array.isArray(childVal) //生命周期函数可以写成数组
         ? childVal
         : [childVal]
     : parentVal
   return res
-    ? dedupeHooks(res)
+    ? dedupeHooks(res) //去重复？
     : res
 }
 
@@ -203,6 +212,7 @@ function mergeAssets (
 //   'directive',
 //   'filter'
 // ]
+//合并默认资源库
 ASSET_TYPES.forEach(function (type) {
   strats[type + 's'] = mergeAssets
 })
@@ -417,6 +427,7 @@ export function mergeOptions (
   // the result of another mergeOptions call.
   // Only merged options has the _base property.
   if (!child._base) {
+    //extend mixin option加入parent
     if (child.extends) {
       parent = mergeOptions(parent, child.extends, vm)
     }
@@ -440,7 +451,12 @@ export function mergeOptions (
   }
   //合并选项，用户可以定义合并策略
   //el、prop默认策略
-  //
+  //assets   extend(Object.create(parent || null), child)
+  //data return function()
+  //hooks  [parent, child] || [child]
+  //watch 存在同参，合并为数组
+  //props methods injects computeds child cover parent
+  //provide mergeDataOrFunction
   function mergeField (key) {
     const strat = strats[key] || defaultStrat
     options[key] = strat(parent[key], child[key], vm, key)
