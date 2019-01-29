@@ -66,10 +66,12 @@
    * Strict object type check. Only returns true
    * for plain JavaScript objects.
    */
+  //判断是否Object对象
   function isPlainObject (obj) {
     return _toString.call(obj) === '[object Object]'
   }
 
+  //判断是否正则对象
   function isRegExp (v) {
     return _toString.call(v) === '[object RegExp]'
   }
@@ -154,6 +156,7 @@
    * Check whether an object has the property.
    */
   var hasOwnProperty = Object.prototype.hasOwnProperty;
+  //获取自身属性 不获取原型上的
   function hasOwn (obj, key) {
     return hasOwnProperty.call(obj, key)
   }
@@ -172,7 +175,7 @@
   /**
    * Camelize a hyphen-delimited string.
    */
-  var camelizeRE = /-(\w)/g;
+  var camelizeRE = /-(\w)/g; //匹配符合后字符串首个字母大写
   var camelize = cached(function (str) {
     return str.replace(camelizeRE, function (_, c) { return c ? c.toUpperCase() : ''; })
   });
@@ -188,6 +191,7 @@
    * Hyphenate a camelCase string.
    */
   var hyphenateRE = /\B([A-Z])/g;
+  // 驼峰转为'-'
   var hyphenate = cached(function (str) {
     return str.replace(hyphenateRE, '-$1').toLowerCase()
   });
@@ -239,6 +243,7 @@
   /**
    * Mix properties into target object.
    */
+  // 混合属性
   function extend (to, _from) {
     for (var key in _from) {
       to[key] = _from[key];
@@ -373,7 +378,7 @@
     'activated',
     'deactivated',
     'errorCaptured',
-    'ssrPrefetch'
+    'serverPrefetch'
   ];
 
   /*  */
@@ -908,6 +913,7 @@
    */
   var shouldObserve = true;
 
+  // 是否观察开关
   function toggleObserving (value) {
     shouldObserve = value;
   }
@@ -1158,11 +1164,12 @@
    * how to merge a parent option value and a child option
    * value into the final value.
    */
-  var strats = config.optionMergeStrategies;
+  var strats = config.optionMergeStrategies; //选项合并策略
 
   /**
    * Options with restrictions
    */
+  //options prop and el strategies
   {
     strats.el = strats.propsData = function (parent, child, vm, key) {
       if (!vm) {
@@ -1178,13 +1185,16 @@
   /**
    * Helper that recursively merges two data objects together.
    */
+  //to: child from: parent
   function mergeData (to, from) {
     if (!from) { return to }
     var key, toVal, fromVal;
 
+    //hasSymbol
     var keys = hasSymbol
       ? Reflect.ownKeys(from)
       : Object.keys(from);
+
 
     for (var i = 0; i < keys.length; i++) {
       key = keys[i];
@@ -1192,12 +1202,18 @@
       if (key === '__ob__') { continue }
       toVal = to[key];
       fromVal = from[key];
-      if (!hasOwn(to, key)) {
+      // 四种情况
+      // to from
+      // 0    0
+      // 1    1
+      // 0    1
+      // 1    0
+      if (!hasOwn(to, key)) { //to不存在该Key 0 1
         set(to, key, fromVal);
       } else if (
         toVal !== fromVal &&
         isPlainObject(toVal) &&
-        isPlainObject(fromVal)
+        isPlainObject(fromVal) //1 1 都为对象
       ) {
         mergeData(toVal, fromVal);
       }
@@ -1275,6 +1291,7 @@
   /**
    * Hooks and props are merged as arrays.
    */
+  //合并生命周期函数
   function mergeHook (
     parentVal,
     childVal
@@ -1282,12 +1299,12 @@
     var res = childVal
       ? parentVal
         ? parentVal.concat(childVal)
-        : Array.isArray(childVal)
+        : Array.isArray(childVal) //生命周期函数可以写成数组
           ? childVal
           : [childVal]
       : parentVal;
     return res
-      ? dedupeHooks(res)
+      ? dedupeHooks(res) //去重复？
       : res
   }
 
@@ -1327,6 +1344,13 @@
     }
   }
 
+
+  // [
+  //   'component',
+  //   'directive',
+  //   'filter'
+  // ]
+  //合并默认资源库
   ASSET_TYPES.forEach(function (type) {
     strats[type + 's'] = mergeAssets;
   });
@@ -1393,6 +1417,7 @@
   /**
    * Default strategy.
    */
+  //默认策略，子空则父，子有则有
   var defaultStrat = function (parentVal, childVal) {
     return childVal === undefined
       ? parentVal
@@ -1429,25 +1454,25 @@
    */
   function normalizeProps (options, vm) {
     var props = options.props;
-    if (!props) { return }
+    if (!props) { return } //无props返回
     var res = {};
     var i, val, name;
-    if (Array.isArray(props)) {
+    if (Array.isArray(props)) { //judge array
       i = props.length;
       while (i--) {
         val = props[i];
         if (typeof val === 'string') {
-          name = camelize(val);
+          name = camelize(val); //转为驼峰
           res[name] = { type: null };
         } else {
           warn('props must be strings when using array syntax.');
         }
       }
-    } else if (isPlainObject(props)) {
+    } else if (isPlainObject(props)) { // Object
       for (var key in props) {
         val = props[key];
-        name = camelize(key);
-        res[name] = isPlainObject(val)
+        name = camelize(key); //转为驼峰
+        res[name] = isPlainObject(val) //是否对象
           ? val
           : { type: val };
       }
@@ -1499,6 +1524,7 @@
         if (typeof def$$1 === 'function') {
           dirs[key] = { bind: def$$1, update: def$$1 };
         }
+        //参数为function时，默认绑定bind和update
       }
     }
   }
@@ -1523,22 +1549,23 @@
     vm
   ) {
     {
-      checkComponents(child);
+      checkComponents(child); //校验实例参数options.components  name
     }
 
     if (typeof child === 'function') {
-      child = child.options;
+      child = child.options; //problem
     }
 
-    normalizeProps(child, vm);
-    normalizeInject(child, vm);
-    normalizeDirectives(child);
+    normalizeProps(child, vm); //正常化props属性
+    normalizeInject(child, vm); //正常化inject属性
+    normalizeDirectives(child); //正常化directive属性
 
     // Apply extends and mixins on the child options,
     // but only if it is a raw options object that isn't
     // the result of another mergeOptions call.
     // Only merged options has the _base property.
     if (!child._base) {
+      //extend mixin option加入parent
       if (child.extends) {
         parent = mergeOptions(parent, child.extends, vm);
       }
@@ -1548,9 +1575,10 @@
         }
       }
     }
-
+    //父子合并
     var options = {};
     var key;
+    //遍历选项
     for (key in parent) {
       mergeField(key);
     }
@@ -1559,6 +1587,14 @@
         mergeField(key);
       }
     }
+    //合并选项，用户可以定义合并策略
+    //el、prop默认策略
+    //assets   extend(Object.create(parent || null), child)
+    //data return function()
+    //hooks  [parent, child] || [child]
+    //watch 存在同参，合并为数组
+    //props methods injects computeds child cover parent
+    //provide mergeDataOrFunction
     function mergeField (key) {
       var strat = strats[key] || defaultStrat;
       options[key] = strat(parent[key], child[key], vm, key);
@@ -1610,14 +1646,15 @@
     vm
   ) {
     var prop = propOptions[key];
-    var absent = !hasOwn(propsData, key);
+    var absent = !hasOwn(propsData, key); //propsData上是否存在
     var value = propsData[key];
     // boolean casting
-    var booleanIndex = getTypeIndex(Boolean, prop.type);
+    var booleanIndex = getTypeIndex(Boolean, prop.type); //判断传入类型是否包含Boolean
     if (booleanIndex > -1) {
+      //如果传入类型包含Boolean 并且不含默认值 则设置为false
       if (absent && !hasOwn(prop, 'default')) {
         value = false;
-      } else if (value === '' || value === hyphenate(key)) {
+      } else if (value === '' || value === hyphenate(key)) { //
         // only cast empty string / same name to boolean if
         // boolean has higher priority
         var stringIndex = getTypeIndex(String, prop.type);
@@ -1766,6 +1803,7 @@
     return getType(a) === getType(b)
   }
 
+  //expectedTypes类型可能为数组
   function getTypeIndex (type, expectedTypes) {
     if (!Array.isArray(expectedTypes)) {
       return isSameType(expectedTypes, type) ? 0 : -1
@@ -1887,6 +1925,8 @@
 
   /*  */
 
+  var isUsingMicroTask = false;
+
   var callbacks = [];
   var pending = false;
 
@@ -1930,6 +1970,7 @@
       // "force" the microtask queue to be flushed by adding an empty timer.
       if (isIOS) { setTimeout(noop); }
     };
+    isUsingMicroTask = true;
   } else if (!isIE && typeof MutationObserver !== 'undefined' && (
     isNative(MutationObserver) ||
     // PhantomJS and iOS 7.x
@@ -1948,6 +1989,7 @@
       counter = (counter + 1) % 2;
       textNode.data = String(counter);
     };
+    isUsingMicroTask = true;
   } else if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
     // Fallback to setImmediate.
     // Techinically it leverages the (macro) task queue,
@@ -2771,7 +2813,9 @@
     }
   }
 
+
   function initLifecycle (vm) {
+
     var options = vm.$options;
 
     // locate first non-abstract parent
@@ -3101,10 +3145,35 @@
     waiting = flushing = false;
   }
 
+  // Async edge case #6566 requires saving the timestamp when event listeners are
+  // attached. However, calling performance.now() has a perf overhead especially
+  // if the page has thousands of event listeners. Instead, we take a timestamp
+  // every time the scheduler flushes and use that for all event listeners
+  // attached during that flush.
+  var currentFlushTimestamp = 0;
+
+  var getNow;
+  if (inBrowser) {
+    // Determine what event timestamp the browser is using. Annoyingly, the
+    // timestamp can either be hi-res ( relative to poge load) or low-res
+    // (relative to UNIX epoch), so in order to compare time we have to use the
+    // same timestamp type when saving the flush timestamp.
+    var lowResNow = Date.now();
+    var eventTimestamp = document.createEvent('Event').timeStamp;
+    // the event timestamp is created after Date.now(), if it's smaller
+    // it means it's using a hi-res timestamp.
+    getNow = eventTimestamp < lowResNow
+      ? function () { return performance.now(); } // hi-res
+      : Date.now; // low-res
+  } else {
+    getNow = Date.now;
+  }
+
   /**
    * Flush both queues and run the watchers.
    */
   function flushSchedulerQueue () {
+    currentFlushTimestamp = getNow();
     flushing = true;
     var watcher, id;
 
@@ -3454,7 +3523,7 @@
   function initState (vm) {
     vm._watchers = [];
     var opts = vm.$options;
-    if (opts.props) { initProps(vm, opts.props); }
+    if (opts.props) { initProps(vm, opts.props); } //初始化props
     if (opts.methods) { initMethods(vm, opts.methods); }
     if (opts.data) {
       initData(vm);
@@ -3474,7 +3543,7 @@
     // instead of dynamic object key enumeration.
     var keys = vm.$options._propKeys = [];
     var isRoot = !vm.$parent;
-    // root instance props should be converted
+    // root instance props should be converted 根实例props应该被转换
     if (!isRoot) {
       toggleObserving(false);
     }
@@ -4774,6 +4843,8 @@
 
   function initMixin (Vue) {
     Vue.prototype._init = function (options) {
+      debugger
+
       var vm = this;
       // a uid
       vm._uid = uid$3++;
@@ -4789,14 +4860,31 @@
       // a flag to avoid this being observed
       vm._isVue = true;
       // merge options
+      //skipping...
       if (options && options._isComponent) {
-        // optimize internal component instantiation
+        // optimize internal component instantiation 优化内部组件实例化
         // since dynamic options merging is pretty slow, and none of the
         // internal component options needs special treatment.
         initInternalComponent(vm, options);
       } else {
+        // Vue.options = {
+        //   components: {
+        //     KeepAlive
+        //     // Transition 和 TransitionGroup 组件在 runtime/index.js 文件中被添加
+        //     // Transition,
+        //       // TransitionGroup
+        //   },
+        //   directives: Object.create(null),
+        //   // 在 runtime/index.js 文件中，为 directives 添加了两个平台化的指令 model 和 show
+        //   // directives:{
+        //   //	model,
+        //     //	show
+        //   // },
+        //   filters: Object.create(null),
+        //   _base: Vue
+        // }
         vm.$options = mergeOptions(
-          resolveConstructorOptions(vm.constructor),
+          resolveConstructorOptions(vm.constructor), //Vue为构造函数直接 返回Vue.options
           options || {},
           vm
         );
@@ -4807,14 +4895,14 @@
       }
       // expose real self
       vm._self = vm;
-      initLifecycle(vm);
-      initEvents(vm);
-      initRender(vm);
-      callHook(vm, 'beforeCreate');
+      initLifecycle(vm); //paused
+      initEvents(vm); //paused
+      initRender(vm); //paused
+      callHook(vm, 'beforeCreate'); //周期函数beforeCreate
       initInjections(vm); // resolve injections before data/props
       initState(vm);
       initProvide(vm); // resolve provide after data/props
-      callHook(vm, 'created');
+      callHook(vm, 'created'); //周期函数created
 
       /* istanbul ignore if */
       if (config.performance && mark) {
@@ -4849,7 +4937,8 @@
   }
 
   function resolveConstructorOptions (Ctor) {
-    var options = Ctor.options;
+    var options = Ctor.options; //runtime时加入
+    //使用Vue.extend子类会有super
     if (Ctor.super) {
       var superOptions = resolveConstructorOptions(Ctor.super);
       var cachedSuperOptions = Ctor.superOptions;
@@ -6899,6 +6988,20 @@
     return val
   }
 
+  function getAndRemoveAttrByRegex (
+    el,
+    name
+  ) {
+    var list = el.attrsList;
+    for (var i = 0, l = list.length; i < l; i++) {
+      var attr = list[i];
+      if (name.test(attr.name)) {
+        list.splice(i, 1);
+        return attr
+      }
+    }
+  }
+
   function rangeSetItem (
     item,
     range
@@ -7278,17 +7381,17 @@
     capture,
     passive
   ) {
-    if (isChrome) {
-      // async edge case #6566: inner click event triggers patch, event handler
-      // attached to outer element during patch, and triggered again. This only
-      // happens in Chrome as it fires microtask ticks between event propagation.
-      // the solution is simple: we save the timestamp when a handler is attached,
-      // and the handler would only fire if the event passed to it was fired
-      // AFTER it was attached.
-      var now = performance.now();
+    // async edge case #6566: inner click event triggers patch, event handler
+    // attached to outer element during patch, and triggered again. This
+    // happens because browsers fire microtask ticks between event propagation.
+    // the solution is simple: we save the timestamp when a handler is attached,
+    // and the handler would only fire if the event passed to it was fired
+    // AFTER it was attached.
+    if (isUsingMicroTask) {
+      var attachedTimestamp = currentFlushTimestamp;
       var original = handler;
       handler = original._wrapper = function (e) {
-        if (e.timeStamp >= now) {
+        if (e.timeStamp >= attachedTimestamp) {
           return original.apply(this, arguments)
         }
       };
@@ -9286,11 +9389,14 @@
   var forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/;
   var forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/;
   var stripParensRE = /^\(|\)$/g;
+  var dynamicKeyRE = /^\[.*\]$/;
 
   var argRE = /:(.*)$/;
   var bindRE = /^:|^\.|^v-bind:/;
   var propBindRE = /^\./;
   var modifierRE = /\.[^.]+/g;
+
+  var slotRE = /^v-slot(:|$)|^#/;
 
   var lineBreakRE = /[\r\n]/;
   var whitespaceRE$1 = /\s+/g;
@@ -9306,6 +9412,7 @@
   var platformIsPreTag;
   var platformMustUseProp;
   var platformGetTagNamespace;
+  var maybeComponent;
 
   function createASTElement (
     tag,
@@ -9336,6 +9443,7 @@
     platformMustUseProp = options.mustUseProp || no;
     platformGetTagNamespace = options.getTagNamespace || no;
     var isReservedTag = options.isReservedTag || no;
+    maybeComponent = function (el) { return !!el.component || !isReservedTag(el.tag); };
 
     transforms = pluckModuleFunction(options.modules, 'transformNode');
     preTransforms = pluckModuleFunction(options.modules, 'preTransformNode');
@@ -9817,10 +9925,7 @@
           true
         );
       }
-      el.slotScope = (
-        slotScope ||
-        getAndRemoveAttr(el, 'slot-scope')
-      );
+      el.slotScope = slotScope || getAndRemoveAttr(el, 'slot-scope');
     } else if ((slotScope = getAndRemoveAttr(el, 'slot-scope'))) {
       /* istanbul ignore if */
       if (el.attrsMap['v-for']) {
@@ -9845,6 +9950,81 @@
         addAttr(el, 'slot', slotTarget, getRawBindingAttr(el, 'slot'));
       }
     }
+
+    // 2.6 v-slot syntax
+    {
+      if (el.tag === 'template') {
+        // v-slot on <template>
+        var slotBinding = getAndRemoveAttrByRegex(el, slotRE);
+        if (slotBinding) {
+          {
+            if (el.slotTarget || el.slotScope) {
+              warn$2(
+                "Unexpected mixed usage of different slot syntaxes.",
+                el
+              );
+            }
+          }
+          el.slotTarget = getSlotName(slotBinding);
+          el.slotScope = slotBinding.value;
+        }
+      } else {
+        // v-slot on component, denotes default slot
+        var slotBinding$1 = getAndRemoveAttrByRegex(el, slotRE);
+        if (slotBinding$1) {
+          {
+            if (!maybeComponent(el)) {
+              warn$2(
+                "v-slot can only be used on components or <template>.",
+                slotBinding$1
+              );
+            }
+            if (el.slotScope || el.slotTarget) {
+              warn$2(
+                "Unexpected mixed usage of different slot syntaxes.",
+                el
+              );
+            }
+            if (el.scopedSlots) {
+              warn$2(
+                "To avoid scope ambiguity, the default slot should also use " +
+                "<template> syntax when there are other named slots.",
+                slotBinding$1
+              );
+            }
+          }
+          // add the component's children to its default slot
+          var slots = el.scopedSlots || (el.scopedSlots = {});
+          var target = getSlotName(slotBinding$1);
+          var slotContainer = slots[target] = createASTElement('template', [], el);
+          slotContainer.children = el.children;
+          slotContainer.slotScope = slotBinding$1.value;
+          // remove children as they are returned from scopedSlots now
+          el.children = [];
+          // mark el non-plain so data gets generated
+          el.plain = false;
+        }
+      }
+    }
+  }
+
+  function getSlotName (binding) {
+    var name = binding.name.replace(slotRE, '');
+    if (!name) {
+      if (binding.name[0] !== '#') {
+        name = 'default';
+      } else {
+        warn$2(
+          "v-slot shorthand syntax requires a slot name.",
+          binding
+        );
+      }
+    }
+    return dynamicKeyRE.test(name)
+      // dynamic [name]
+      ? name.slice(1, -1)
+      // static name
+      : ("\"" + name + "\"")
   }
 
   // handle <slot/> outlets
@@ -10168,10 +10348,10 @@
 
   var baseOptions = {
     expectHTML: true,
-    modules: modules$1,
-    directives: directives$1,
+    modules: modules$1,  //[klass,style,model]
+    directives: directives$1,  //{model,text,html}
     isPreTag: isPreTag,
-    isUnaryTag: isUnaryTag,
+    isUnaryTag: isUnaryTag, //是否一元标签
     mustUseProp: mustUseProp,
     canBeLeftOpenTag: canBeLeftOpenTag,
     isReservedTag: isReservedTag,
@@ -11134,13 +11314,14 @@
       options,
       vm
     ) {
+      //合并参数
       options = extend({}, options);
       var warn$$1 = options.warn || warn;
       delete options.warn;
 
       /* istanbul ignore if */
       {
-        // detect possible CSP restriction
+        // detect possible CSP restriction CSP:内容安全策略
         try {
           new Function('return 1');
         } catch (e) {
@@ -11168,6 +11349,7 @@
       var compiled = compile(template, options);
 
       // check compilation errors/tips
+      //编译后的错误和提示信息
       {
         if (compiled.errors && compiled.errors.length) {
           if (options.outputSourceRange) {
@@ -11284,7 +11466,7 @@
 
         var compiled = baseCompile(template.trim(), finalOptions);
         {
-          detectErrors(compiled.ast, warn);
+          detectErrors(compiled.ast, warn); //检测AST错误
         }
         compiled.errors = errors;
         compiled.tips = tips;
@@ -11307,11 +11489,11 @@
     template,
     options
   ) {
-    var ast = parse(template.trim(), options);
+    var ast = parse(template.trim(), options); //解析template 转为AST
     if (options.optimize !== false) {
-      optimize(ast, options);
+      optimize(ast, options); //优化
     }
-    var code = generate(ast, options);
+    var code = generate(ast, options);  //生成
     return {
       ast: ast,
       render: code.render,
@@ -11348,10 +11530,13 @@
   });
 
   var mount = Vue.prototype.$mount;
+  //完整版
+  //重写$mount template to render
   Vue.prototype.$mount = function (
     el,
     hydrating
   ) {
+    debugger
     el = el && query(el);
 
     /* istanbul ignore if */
@@ -11366,6 +11551,7 @@
     // resolve template/el and convert to render function
     if (!options.render) {
       var template = options.template;
+      // 优先取template,再去el.outerHTML
       if (template) {
         if (typeof template === 'string') {
           if (template.charAt(0) === '#') {
@@ -11399,8 +11585,8 @@
           outputSourceRange: "development" !== 'production',
           shouldDecodeNewlines: shouldDecodeNewlines,
           shouldDecodeNewlinesForHref: shouldDecodeNewlinesForHref,
-          delimiters: options.delimiters,
-          comments: options.comments
+          delimiters: options.delimiters, //纯文本插入分割符
+          comments: options.comments //是否保留注释
         }, this);
         var render = ref.render;
         var staticRenderFns = ref.staticRenderFns;
