@@ -219,7 +219,7 @@ function genConfig (name) {
   const config = {
     input: opts.entry,
     external: opts.external,
-    sourceMap: true, //添加调试
+    // sourceMap: true, //添加调试
     plugins: [
       replace({
         __WEEX__: !!opts.weex,

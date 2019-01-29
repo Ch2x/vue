@@ -1,20 +1,31 @@
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>start</title>
-  </head>
-  <body>
-    <div id="app">
-      <p>{{message}}</p>
-    </div>
-  </body>
-  <script src="./../dist/vue.js"></script>
-  <script>
-    var vm = new Vue({
-      el: '#app',
-      data: {
-        message: 'text',
-      }
-    })
-  </script>
+
+<head>
+  <meta charset="UTF-8">
+  <title>start</title>
+</head>
+
+<body>
+  <div id="app">
+    <p>{{message}}</p>
+    <child></child>
+  </div>
+</body>
+<script src="./../dist/vue.js"></script>
+<script>
+  Vue.component('child', {
+    template: '<div>A custom component!</div>'
+  })
+  var vm = new Vue({
+    el: '#app',
+    data: {
+      message: 'text',
+    },
+    component: {
+      childs: child
+    }
+  })
+
+</script>
+
 </html>
