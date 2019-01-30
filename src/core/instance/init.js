@@ -14,11 +14,10 @@ let uid = 0
 
 export function initMixin (Vue: Class<Component>) {
   Vue.prototype._init = function (options?: Object) {
-    debugger
 
     const vm: Component = this
     // a uid
-    vm._uid = uid++
+    vm._uid = uid++ //先相等再相加
 
     let startTag, endTag
     /* istanbul ignore if */
@@ -60,6 +59,7 @@ export function initMixin (Vue: Class<Component>) {
         vm
       )
     }
+
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
       initProxy(vm)
@@ -68,7 +68,7 @@ export function initMixin (Vue: Class<Component>) {
     }
     // expose real self
     vm._self = vm
-    initLifecycle(vm) //paused
+    initLifecycle(vm) //
     initEvents(vm) //paused
     initRender(vm) //paused
     callHook(vm, 'beforeCreate') //周期函数beforeCreate
@@ -76,7 +76,7 @@ export function initMixin (Vue: Class<Component>) {
     initState(vm)
     initProvide(vm) // resolve provide after data/props
     callHook(vm, 'created') //周期函数created
-
+    console.log(vm)
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
       vm._name = formatComponentName(vm, false)

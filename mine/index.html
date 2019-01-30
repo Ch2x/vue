@@ -7,23 +7,49 @@
 
 <body>
   <div id="app">
-    <p>{{message}}</p>
-    <child></child>
+    <p @click="handleClick">{{message | text}}</p>
+    <!-- <child text="你好" flag></child>
+    <child1 text="你好"></child1> -->
   </div>
 </body>
 <script src="./../dist/vue.js"></script>
 <script>
   Vue.component('child', {
-    template: '<div>A custom component!</div>'
+    template: '<div>A custom component! {{text}}</div>',
+    props: ['text', 'flag']
   })
+
+  const child1 = {
+    template: '<div>A custom component1! {{text}}</div>',
+    props: ['text']
+  }
+
   var vm = new Vue({
     el: '#app',
     data: {
       message: 'text',
     },
-    component: {
-      childs: child
+    filters: {
+      text: function(val) {
+        return val + val;
+      }
+    },
+    props: {
+      test: {
+        type: Array,
+        default: function() {
+          return []
+        },
+      }
+    },
+    methods: {
+      handleClick: function() {
+        console.log('click');
+      }
     }
+    // components: {
+    //   child1
+    // }
   })
 
 </script>

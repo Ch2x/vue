@@ -113,13 +113,13 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     return
   }
   let ob: Observer | void
-  if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
+  if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) { //the existing observer if the value already has one
     ob = value.__ob__
-  } else if (
+  } else if ( //returns the new observer if successfully observed,
     shouldObserve &&
     !isServerRendering() &&
     (Array.isArray(value) || isPlainObject(value)) &&
-    Object.isExtensible(value) &&
+    Object.isExtensible(value) && //Object.isExtensible(value) 对象是否可扩展
     !value._isVue
   ) {
     ob = new Observer(value)

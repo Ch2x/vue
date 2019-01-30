@@ -1,5 +1,6 @@
 /* @flow */
 
+// 一个空的冻结对象
 export const emptyObject = Object.freeze({})
 
 // These helpers produce better VM code in JS engines due to their
@@ -38,6 +39,7 @@ export function isPrimitive (value: any): boolean %checks {
  * Objects from primitive values when we know the value
  * is a JSON-compliant type.
  */
+//不为空且为对象 typeof [] === 'object' typeof {} === 'object'
 export function isObject (obj: mixed): boolean %checks {
   return obj !== null && typeof obj === 'object'
 }
@@ -212,6 +214,7 @@ function nativeBind (fn: Function, ctx: Object): Function {
   return fn.bind(ctx)
 }
 
+//bind polyfill 转 apply 或 call
 export const bind = Function.prototype.bind
   ? nativeBind
   : polyfillBind

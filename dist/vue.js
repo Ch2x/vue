@@ -11,6 +11,7 @@
 
   /*  */
 
+  // 一个空的冻结对象
   var emptyObject = Object.freeze({});
 
   // These helpers produce better VM code in JS engines due to their
@@ -49,6 +50,7 @@
    * Objects from primitive values when we know the value
    * is a JSON-compliant type.
    */
+  //不为空且为对象 typeof [] === 'object' typeof {} === 'object'
   function isObject (obj) {
     return obj !== null && typeof obj === 'object'
   }
@@ -223,6 +225,7 @@
     return fn.bind(ctx)
   }
 
+  //bind polyfill 转 apply 或 call
   var bind = Function.prototype.bind
     ? nativeBind
     : polyfillBind;
@@ -996,13 +999,13 @@
       return
     }
     var ob;
-    if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
+    if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) { //the existing observer if the value already has one
       ob = value.__ob__;
-    } else if (
+    } else if ( //returns the new observer if successfully observed,
       shouldObserve &&
       !isServerRendering() &&
       (Array.isArray(value) || isPlainObject(value)) &&
-      Object.isExtensible(value) &&
+      Object.isExtensible(value) && //Object.isExtensible(value) 对象是否可扩展
       !value._isVue
     ) {
       ob = new Observer(value);
@@ -1688,7 +1691,7 @@
       return undefined
     }
     var def = prop.default;
-    // warn against non-factory defaults for Object & Array
+    // warn against non-factory defaults for Object & Array Array和Object
     if (isObject(def)) {
       warn(
         'Invalid default value for prop "' + key + '": ' +
@@ -1699,6 +1702,7 @@
     }
     // the raw prop value was also undefined from previous render,
     // return previous default value to avoid unnecessary watcher trigger
+    //problem
     if (vm && vm.$options.propsData &&
       vm.$options.propsData[key] === undefined &&
       vm._props[key] !== undefined
@@ -1795,6 +1799,7 @@
    * across different vms / iframes.
    */
   function getType (fn) {
+    //匹配空白字符开头0到多 function(字符一个到多)
     var match = fn && fn.toString().match(/^\s*function (\w+)/);
     return match ? match[1] : ''
   }
@@ -2604,6 +2609,7 @@
     vm._events = Object.create(null);
     vm._hasHookEvent = false;
     // init parent attached events
+    // 1.Vue实例
     var listeners = vm.$options._parentListeners;
     if (listeners) {
       updateComponentListeners(vm, listeners);
@@ -2817,7 +2823,6 @@
   function initLifecycle (vm) {
 
     var options = vm.$options;
-
     // locate first non-abstract parent
     var parent = options.parent;
     if (parent && !options.abstract) {
@@ -2827,6 +2832,7 @@
       parent.$children.push(vm);
     }
 
+    // 1.Vue构造函数实例化
     vm.$parent = parent;
     vm.$root = parent ? parent.$root : vm;
 
@@ -3524,7 +3530,7 @@
     vm._watchers = [];
     var opts = vm.$options;
     if (opts.props) { initProps(vm, opts.props); } //初始化props
-    if (opts.methods) { initMethods(vm, opts.methods); }
+    if (opts.methods) { initMethods(vm, opts.methods); } //初始化方法
     if (opts.data) {
       initData(vm);
     } else {
@@ -3602,6 +3608,7 @@
     var props = vm.$options.props;
     var methods = vm.$options.methods;
     var i = keys.length;
+    //methods不能存在props data不能存在methods和props
     while (i--) {
       var key = keys[i];
       {
@@ -3619,7 +3626,7 @@
           vm
         );
       } else if (!isReserved(key)) {
-        proxy(vm, "_data", key);
+        proxy(vm, "_data", key); //设置Object.defineProperty
       }
     }
     // observe data
@@ -3737,6 +3744,7 @@
     var props = vm.$options.props;
     for (var key in methods) {
       {
+        //是否函数
         if (typeof methods[key] !== 'function') {
           warn(
             "Method \"" + key + "\" has type \"" + (typeof methods[key]) + "\" in the component definition. " +
@@ -3744,12 +3752,14 @@
             vm
           );
         }
+        //是否与props重名
         if (props && hasOwn(props, key)) {
           warn(
             ("Method \"" + key + "\" has already been defined as a prop."),
             vm
           );
         }
+        //保留名字或者已经存在名字
         if ((key in vm) && isReserved(key)) {
           warn(
             "Method \"" + key + "\" conflicts with an existing Vue instance method. " +
@@ -4743,6 +4753,7 @@
   function initRender (vm) {
     vm._vnode = null; // the root of the child tree
     vm._staticTrees = null; // v-once cached trees
+    console.log(vm);
     var options = vm.$options;
     var parentVnode = vm.$vnode = options._parentVnode; // the placeholder node in parent tree
     var renderContext = parentVnode && parentVnode.context;
@@ -4843,11 +4854,10 @@
 
   function initMixin (Vue) {
     Vue.prototype._init = function (options) {
-      debugger
 
       var vm = this;
       // a uid
-      vm._uid = uid$3++;
+      vm._uid = uid$3++; //先相等再相加
 
       var startTag, endTag;
       /* istanbul ignore if */
@@ -4889,13 +4899,14 @@
           vm
         );
       }
+
       /* istanbul ignore else */
       {
         initProxy(vm);
       }
       // expose real self
       vm._self = vm;
-      initLifecycle(vm); //paused
+      initLifecycle(vm); //
       initEvents(vm); //paused
       initRender(vm); //paused
       callHook(vm, 'beforeCreate'); //周期函数beforeCreate
@@ -4903,7 +4914,7 @@
       initState(vm);
       initProvide(vm); // resolve provide after data/props
       callHook(vm, 'created'); //周期函数created
-
+      console.log(vm);
       /* istanbul ignore if */
       if (config.performance && mark) {
         vm._name = formatComponentName(vm, false);
@@ -11536,7 +11547,6 @@
     el,
     hydrating
   ) {
-    debugger
     el = el && query(el);
 
     /* istanbul ignore if */

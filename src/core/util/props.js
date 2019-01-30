@@ -71,7 +71,7 @@ function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): a
     return undefined
   }
   const def = prop.default
-  // warn against non-factory defaults for Object & Array
+  // warn against non-factory defaults for Object & Array Array和Object
   if (process.env.NODE_ENV !== 'production' && isObject(def)) {
     warn(
       'Invalid default value for prop "' + key + '": ' +
@@ -82,6 +82,7 @@ function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): a
   }
   // the raw prop value was also undefined from previous render,
   // return previous default value to avoid unnecessary watcher trigger
+  //problem
   if (vm && vm.$options.propsData &&
     vm.$options.propsData[key] === undefined &&
     vm._props[key] !== undefined
@@ -181,6 +182,7 @@ function assertType (value: any, type: Function): {
  * across different vms / iframes.
  */
 function getType (fn) {
+  //匹配空白字符开头0到多 function(字符一个到多)
   const match = fn && fn.toString().match(/^\s*function (\w+)/)
   return match ? match[1] : ''
 }

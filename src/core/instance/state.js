@@ -49,7 +49,7 @@ export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
   if (opts.props) initProps(vm, opts.props) //初始化props
-  if (opts.methods) initMethods(vm, opts.methods)
+  if (opts.methods) initMethods(vm, opts.methods) //初始化方法
   if (opts.data) {
     initData(vm)
   } else {
@@ -127,6 +127,7 @@ function initData (vm: Component) {
   const props = vm.$options.props
   const methods = vm.$options.methods
   let i = keys.length
+  //methods不能存在props data不能存在methods和props
   while (i--) {
     const key = keys[i]
     if (process.env.NODE_ENV !== 'production') {
@@ -144,7 +145,7 @@ function initData (vm: Component) {
         vm
       )
     } else if (!isReserved(key)) {
-      proxy(vm, `_data`, key)
+      proxy(vm, `_data`, key) //设置Object.defineProperty
     }
   }
   // observe data
@@ -263,6 +264,7 @@ function initMethods (vm: Component, methods: Object) {
   const props = vm.$options.props
   for (const key in methods) {
     if (process.env.NODE_ENV !== 'production') {
+      //是否函数
       if (typeof methods[key] !== 'function') {
         warn(
           `Method "${key}" has type "${typeof methods[key]}" in the component definition. ` +
@@ -270,12 +272,14 @@ function initMethods (vm: Component, methods: Object) {
           vm
         )
       }
+      //是否与props重名
       if (props && hasOwn(props, key)) {
         warn(
           `Method "${key}" has already been defined as a prop.`,
           vm
         )
       }
+      //保留名字或者已经存在名字
       if ((key in vm) && isReserved(key)) {
         warn(
           `Method "${key}" conflicts with an existing Vue instance method. ` +

@@ -33,7 +33,6 @@ export function setActiveInstance(vm: Component) {
 export function initLifecycle (vm: Component) {
 
   const options = vm.$options
-
   // locate first non-abstract parent
   let parent = options.parent
   if (parent && !options.abstract) {
@@ -43,6 +42,7 @@ export function initLifecycle (vm: Component) {
     parent.$children.push(vm)
   }
 
+  // 1.Vue构造函数实例化
   vm.$parent = parent
   vm.$root = parent ? parent.$root : vm
 
