@@ -274,6 +274,7 @@
    * Stubbing args to make Flow happy without leaving useless transpiled code
    * with ...rest (https://flow.org/blog/2017/05/07/Strict-Function-Call-Arity/).
    */
+  // 空函数
   function noop (a, b, c) {}
 
   /**
@@ -932,7 +933,7 @@
     this.dep = new Dep();
     this.vmCount = 0;
     def(value, '__ob__', this);
-    if (Array.isArray(value)) {
+    if (Array.isArray(value)) { //数组特殊处理
       if (hasProto) {
         protoAugment(value, arrayMethods);
       } else {
@@ -1027,15 +1028,16 @@
     shallow
   ) {
     var dep = new Dep();
-
     var property = Object.getOwnPropertyDescriptor(obj, key);
+    //configurable 当且仅当指定对象的属性描述可以被改变或者属性可被删除时，为true。
     if (property && property.configurable === false) {
       return
     }
 
-    // cater for pre-defined getter/setters
+    // cater for pre-defined getter/setters 用户定义的getter/setters
     var getter = property && property.get;
     var setter = property && property.set;
+    //paused
     if ((!getter || setter) && arguments.length === 2) {
       val = obj[key];
     }
@@ -1045,7 +1047,7 @@
       enumerable: true,
       configurable: true,
       get: function reactiveGetter () {
-        var value = getter ? getter.call(obj) : val;
+        var value = getter ? getter.call(obj) : val; //存在getter 使用用户所传的getter
         if (Dep.target) {
           dep.depend();
           if (childOb) {
@@ -1058,6 +1060,7 @@
         return value
       },
       set: function reactiveSetter (newVal) {
+
         var value = getter ? getter.call(obj) : val;
         /* eslint-disable no-self-compare */
         if (newVal === value || (newVal !== newVal && value !== value)) {
@@ -11561,7 +11564,7 @@
     // resolve template/el and convert to render function
     if (!options.render) {
       var template = options.template;
-      // 优先取template,再去el.outerHTML
+      // 优先取template,再取el.outerHTML
       if (template) {
         if (typeof template === 'string') {
           if (template.charAt(0) === '#') {

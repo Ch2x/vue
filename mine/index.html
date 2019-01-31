@@ -8,6 +8,7 @@
 <body>
   <div id="app">
     <p @click="handleClick">{{message | text}}</p>
+    <button @click="handleOpen">点击我</button>
     <!-- <child text="你好" flag></child>
     <child1 text="你好"></child1> -->
   </div>
@@ -45,6 +46,9 @@
     methods: {
       handleClick: function() {
         console.log('click');
+      },
+      handleOpen: function() {
+        this.message = 'test'
       }
     }
     // components: {

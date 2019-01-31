@@ -141,7 +141,6 @@ export function defineReactive (
   shallow?: boolean
 ) {
   const dep = new Dep()
-
   const property = Object.getOwnPropertyDescriptor(obj, key)
   //configurable 当且仅当指定对象的属性描述可以被改变或者属性可被删除时，为true。
   if (property && property.configurable === false) {
@@ -174,6 +173,7 @@ export function defineReactive (
       return value
     },
     set: function reactiveSetter (newVal) {
+
       const value = getter ? getter.call(obj) : val
       /* eslint-disable no-self-compare */
       if (newVal === value || (newVal !== newVal && value !== value)) {
