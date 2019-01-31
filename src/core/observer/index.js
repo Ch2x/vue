@@ -45,7 +45,7 @@ export class Observer {
     this.dep = new Dep()
     this.vmCount = 0
     def(value, '__ob__', this)
-    if (Array.isArray(value)) {
+    if (Array.isArray(value)) { //数组特殊处理
       if (hasProto) {
         protoAugment(value, arrayMethods)
       } else {
@@ -143,13 +143,15 @@ export function defineReactive (
   const dep = new Dep()
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
+  //configurable 当且仅当指定对象的属性描述可以被改变或者属性可被删除时，为true。
   if (property && property.configurable === false) {
     return
   }
 
-  // cater for pre-defined getter/setters
+  // cater for pre-defined getter/setters 用户定义的getter/setters
   const getter = property && property.get
   const setter = property && property.set
+  //paused
   if ((!getter || setter) && arguments.length === 2) {
     val = obj[key]
   }
@@ -159,7 +161,7 @@ export function defineReactive (
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
-      const value = getter ? getter.call(obj) : val
+      const value = getter ? getter.call(obj) : val //存在getter 使用用户所传的getter
       if (Dep.target) {
         dep.depend()
         if (childOb) {

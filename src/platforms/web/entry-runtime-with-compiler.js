@@ -35,7 +35,7 @@ Vue.prototype.$mount = function (
   // resolve template/el and convert to render function
   if (!options.render) {
     let template = options.template
-    // 优先取template,再去el.outerHTML
+    // 优先取template,再取el.outerHTML
     if (template) {
       if (typeof template === 'string') {
         if (template.charAt(0) === '#') {
