@@ -44,6 +44,7 @@ Vue.prototype.$mount = function (
 
 // devtools global hook
 /* istanbul ignore next */
+//配置是否允许 vue-devtools 检查代码
 if (inBrowser) {
   setTimeout(() => {
     if (config.devtools) {

@@ -24,6 +24,7 @@
     return v !== undefined && v !== null
   }
 
+  //布尔值等于true
   function isTrue (v) {
     return v === true
   }
@@ -35,6 +36,7 @@
   /**
    * Check if value is primitive.
    */
+  //检查是否原始值
   function isPrimitive (value) {
     return (
       typeof value === 'string' ||
@@ -1593,14 +1595,14 @@
         mergeField(key);
       }
     }
-    //合并选项，用户可以定义合并策略
-    //el、prop默认策略
-    //assets   extend(Object.create(parent || null), child)
-    //data return function()
-    //hooks  [parent, child] || [child]
-    //watch 存在同参，合并为数组
-    //props methods injects computeds child cover parent
-    //provide mergeDataOrFunction
+    // 合并选项，用户可以定义合并策略
+    // el、prop默认策略
+    // assets   extend(Object.create(parent || null), child)
+    // data return function()
+    // hooks  [parent, child] || [child]
+    // watch 存在同参，合并为数组
+    // props methods injects computeds child cover parent
+    // provide mergeDataOrFunction
     function mergeField (key) {
       var strat = strats[key] || defaultStrat;
       options[key] = strat(parent[key], child[key], vm, key);
@@ -2854,7 +2856,7 @@
     Vue.prototype._update = function (vnode, hydrating) {
       var vm = this;
       var prevEl = vm.$el;
-      var prevVnode = vm._vnode;
+      var prevVnode = vm._vnode; //之前的vnode
       var restoreActiveInstance = setActiveInstance(vm);
       vm._vnode = vnode;
       // Vue.prototype.__patch__ is injected in entry points
@@ -2974,7 +2976,6 @@
         var vnode = vm._render();
         mark(endTag);
         measure(("vue " + name + " render"), startTag, endTag);
-
         mark(startTag);
         vm._update(vnode, hydrating);
         mark(endTag);
@@ -8908,6 +8909,7 @@
 
   // devtools global hook
   /* istanbul ignore next */
+  //配置是否允许 vue-devtools 检查代码
   if (inBrowser) {
     setTimeout(function () {
       if (config.devtools) {
@@ -11545,7 +11547,7 @@
 
   var mount = Vue.prototype.$mount;
   //完整版
-  //重写$mount template to render
+  //重写$mount template to render 多了生成render
   Vue.prototype.$mount = function (
     el,
     hydrating

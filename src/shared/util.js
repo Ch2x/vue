@@ -13,6 +13,7 @@ export function isDef (v: any): boolean %checks {
   return v !== undefined && v !== null
 }
 
+//布尔值等于true
 export function isTrue (v: any): boolean %checks {
   return v === true
 }
@@ -24,6 +25,7 @@ export function isFalse (v: any): boolean %checks {
 /**
  * Check if value is primitive.
  */
+//检查是否原始值
 export function isPrimitive (value: any): boolean %checks {
   return (
     typeof value === 'string' ||

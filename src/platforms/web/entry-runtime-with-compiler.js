@@ -16,7 +16,7 @@ const idToTemplate = cached(id => {
 
 const mount = Vue.prototype.$mount
 //完整版
-//重写$mount template to render
+//重写$mount template to render 多了生成render
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean

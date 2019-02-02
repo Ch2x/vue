@@ -449,14 +449,14 @@ export function mergeOptions (
       mergeField(key)
     }
   }
-  //合并选项，用户可以定义合并策略
-  //el、prop默认策略
-  //assets   extend(Object.create(parent || null), child)
-  //data return function()
-  //hooks  [parent, child] || [child]
-  //watch 存在同参，合并为数组
-  //props methods injects computeds child cover parent
-  //provide mergeDataOrFunction
+  // 合并选项，用户可以定义合并策略
+  // el、prop默认策略
+  // assets   extend(Object.create(parent || null), child)
+  // data return function()
+  // hooks  [parent, child] || [child]
+  // watch 存在同参，合并为数组
+  // props methods injects computeds child cover parent
+  // provide mergeDataOrFunction
   function mergeField (key) {
     const strat = strats[key] || defaultStrat
     options[key] = strat(parent[key], child[key], vm, key)
