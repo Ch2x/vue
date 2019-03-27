@@ -308,4 +308,68 @@ _inactive :null,
 
 ## new Watcher
 
+{
+ _uid: 0,
+ _isVue: true,
+ $options； {
+   ...
+ },
+ _renderProxy: vm,
+ _self： vm,
+ $parent: undefined,
+ $root: vm,
+ $children: [],
+ $refs: {},
+ _watcher : null,
+_inactive :null,
+  _directInactive : false,
+  _isMounted : false,
+  _isDestroyed :false,
+  _isBeingDestroyed :false,
+
+  _events: {},
+  _hasHookEvent: false,
+
+  _vnode: null,
+  _staticTrees: null,
+
+  $vnode:'',
+  $slots: {},
+  $scopedSlots: emptyObject,
+  _c: (a, b, c, d) => createElement(vm, a, b, c, d, false),
+
+  $createElement: (a, b, c, d) => createElement(vm, a, b, c, d, true)
+
+  _watchers: [this], //观察者对象
+
+  render,
+  staticRenderFns,
+
+  $el: el,
+
+  _watcher: this, //观察者对象
+
+
+
+}
+
+new watcher {
+  deep: false,
+  user: false,
+  lazy: false,
+  sync: false,
+  before: false,
+  cb: noop,
+  id: 0,
+  active = true
+  dirty = this.lazy // for lazy watchers
+  deps = []
+  newDeps = []
+  depIds = new Set()
+  newDepIds = new Set()
+  expression = process.env.NODE_ENV !== 'production'
+      ? expOrFn.toString()
+      : ''
+}
+
 # mounted
