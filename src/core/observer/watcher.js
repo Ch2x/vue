@@ -132,7 +132,7 @@ export default class Watcher {
       this.newDeps.push(dep)
       if (!this.depIds.has(id)) {
         dep.addSub(this)
-      } 
+      }
     }
   }
 

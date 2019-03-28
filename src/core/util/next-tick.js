@@ -84,6 +84,9 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
   }
 }
 
+// nextTick 兼容选择
+// promise => MutationObserver => setImmediate => setTimeout
+
 export function nextTick (cb?: Function, ctx?: Object) {
   let _resolve
   callbacks.push(() => {

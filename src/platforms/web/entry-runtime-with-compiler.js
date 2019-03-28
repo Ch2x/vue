@@ -22,7 +22,6 @@ Vue.prototype.$mount = function (
   hydrating?: boolean
 ): Component {
   el = el && query(el)
-
   /* istanbul ignore if */
   if (el === document.body || el === document.documentElement) {
     process.env.NODE_ENV !== 'production' && warn(
@@ -32,7 +31,8 @@ Vue.prototype.$mount = function (
   }
 
   const options = this.$options
-  // resolve template/el and convert to render function
+
+  // resolve template/el and convert to render function    如果参数中包含render(createElement)，则不取template 或者 el
   if (!options.render) {
     let template = options.template
     // 优先取template,再取el.outerHTML

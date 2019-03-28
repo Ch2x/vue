@@ -2014,6 +2014,9 @@
     };
   }
 
+  // nextTick 兼容选择
+  // promise => MutationObserver => setImmediate => setTimeout
+
   function nextTick (cb, ctx) {
     var _resolve;
     callbacks.push(function () {
@@ -4757,7 +4760,7 @@
   function initRender (vm) {
     vm._vnode = null; // the root of the child tree
     vm._staticTrees = null; // v-once cached trees
-    console.log(vm);
+
     var options = vm.$options;
     var parentVnode = vm.$vnode = options._parentVnode; // the placeholder node in parent tree
     var renderContext = parentVnode && parentVnode.context;
@@ -4858,7 +4861,6 @@
 
   function initMixin (Vue) {
     Vue.prototype._init = function (options) {
-
       var vm = this;
       // a uid
       vm._uid = uid$3++; //先相等再相加
@@ -4918,14 +4920,15 @@
       initState(vm);
       initProvide(vm); // resolve provide after data/props
       callHook(vm, 'created'); //周期函数created
-      console.log(vm);
       /* istanbul ignore if */
+
       if (config.performance && mark) {
         vm._name = formatComponentName(vm, false);
         mark(endTag);
         measure(("vue " + (vm._name) + " init"), startTag, endTag);
       }
-
+      // 如果在实例化时存在这个选项，实例将立即进入编译过程，否则，需要显式调用 vm.$mount() 手动开启编译。
+      // 编译过程即是生成render函数
       if (vm.$options.el) {
         vm.$mount(vm.$options.el);
       }
@@ -11553,7 +11556,6 @@
     hydrating
   ) {
     el = el && query(el);
-
     /* istanbul ignore if */
     if (el === document.body || el === document.documentElement) {
       warn(
@@ -11563,7 +11565,8 @@
     }
 
     var options = this.$options;
-    // resolve template/el and convert to render function
+
+    // resolve template/el and convert to render function    如果参数中包含render(createElement)，则不取template 或者 el
     if (!options.render) {
       var template = options.template;
       // 优先取template,再取el.outerHTML

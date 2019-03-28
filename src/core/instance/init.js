@@ -14,7 +14,6 @@ let uid = 0
 
 export function initMixin (Vue: Class<Component>) {
   Vue.prototype._init = function (options?: Object) {
-
     const vm: Component = this
     // a uid
     vm._uid = uid++ //先相等再相加
@@ -76,14 +75,15 @@ export function initMixin (Vue: Class<Component>) {
     initState(vm)
     initProvide(vm) // resolve provide after data/props
     callHook(vm, 'created') //周期函数created
-    console.log(vm)
     /* istanbul ignore if */
+
     if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
       vm._name = formatComponentName(vm, false)
       mark(endTag)
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
-
+    // 如果在实例化时存在这个选项，实例将立即进入编译过程，否则，需要显式调用 vm.$mount() 手动开启编译。
+    // 编译过程即是生成render函数
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }

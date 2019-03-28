@@ -15,15 +15,16 @@
 </body>
 <script src="./../dist/vue.js"></script>
 <script>
-  Vue.component('child', {
-    template: '<div>A custom component! {{text}}</div>',
-    props: ['text', 'flag']
-  })
+  // Vue.component('child', {
+  //   template: '<div>A custom component! {{text}}</div>',
+  //   props: ['text', 'flag']
+  // })
 
   const child1 = {
     template: '<div>A custom component1! {{text}}</div>',
     props: ['text']
   }
+
 
   var vm = new Vue({
     el: '#app',
@@ -31,30 +32,30 @@
       message: 'text',
     },
     filters: {
-      text: function(val) {
+      text: function (val) {
         return val + val;
       }
     },
     props: {
       test: {
         type: Array,
-        default: function() {
+        default: function () {
           return []
         },
       }
     },
     methods: {
-      handleClick: function() {
+      handleClick: function () {
         console.log('click');
       },
-      handleOpen: function() {
+      handleOpen: function () {
         this.message = 'test'
       }
     }
     // components: {
     //   child1
     // }
-  })
+  }).$mount('#app')
 
 </script>
 

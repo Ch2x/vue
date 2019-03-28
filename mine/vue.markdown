@@ -213,7 +213,7 @@ paused
 
 #created
 
-#$mount  完成版 template to render 生成render过程
+#$mount  完成版 template to render 生成render过程 (非周期函数过程) 有render则不判断template 或者 render
 
 ### 取el
 
@@ -370,6 +370,9 @@ new watcher {
   expression = process.env.NODE_ENV !== 'production'
       ? expOrFn.toString()
       : ''
+
+  getter: expOrFn,
+  value: this.get(),
 }
 
 # mounted
