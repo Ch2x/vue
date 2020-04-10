@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app">
+        <button @click="handleClick">点击</button>
+        <keep-alive>
+            <component :is="currentComponent"></component>
+        </keep-alive>
+    </div>
+</body>
+<script src="./../../dist/vue.js"></script>
+<script>
+    const A = {template: '<div>{{a}}</div>',data: function() {
+            return {
+                a:1,
+            }
+        },}
+    const B = {template: '<div>B</div>'}
+    new Vue({
+        el: '#app',
+        data: function() {
+            return {
+                a:1,
+                currentComponent: 'A'
+            }
+        },
+        components: {
+            A,
+            B
+        },
+        methods: {
+            handleClick() {
+                if(this.currentComponent === 'A') {
+                    this.currentComponent = 'B'
+                } else {
+                    this.currentComponent = "A"
+                }
+            }
+        }
+    })
+</script>
+</html>

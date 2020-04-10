@@ -81,6 +81,7 @@ export default {
   },
 
   render () {
+    debugger
     const slot = this.$slots.default
     const vnode: VNode = getFirstComponentChild(slot)
     const componentOptions: ?VNodeComponentOptions = vnode && vnode.componentOptions
