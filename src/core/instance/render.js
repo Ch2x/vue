@@ -62,9 +62,9 @@ export function renderMixin (Vue: Class<Component>) {
     const vm: Component = this
     const { render, _parentVnode } = vm.$options
 
-    // reset _rendered flag on slots for duplicate slot check
+    // reset _rendered flag on slots for duplicate slot check 
     if (process.env.NODE_ENV !== 'production') {
-      for (const key in vm.$slots) {
+      for (const key in vm.$slots) { //用来访问被插槽分发的内容
         // $flow-disable-line
         vm.$slots[key]._rendered = false
       }

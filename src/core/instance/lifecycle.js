@@ -169,7 +169,7 @@ export function mountComponent (
       const endTag = `vue-perf-end:${id}`
 
       mark(startTag)
-      const vnode = vm._render()
+      const vnode = vm._render() // 生成vnode
       mark(endTag)
       measure(`vue ${name} render`, startTag, endTag)
 

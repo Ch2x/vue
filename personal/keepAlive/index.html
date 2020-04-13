@@ -11,6 +11,9 @@
         <keep-alive>
             <component :is="currentComponent"></component>
         </keep-alive>
+        <br>
+        <div>{{c.a}}</div>
+        <button @click="handleClick1">测试值的变换</button>
     </div>
 </body>
 <script src="./../../dist/vue.js"></script>
@@ -21,12 +24,15 @@
             }
         },}
     const B = {template: '<div>B</div>'}
-    new Vue({
+    const vm = new Vue({
         el: '#app',
         data: function() {
             return {
                 a:1,
-                currentComponent: 'A'
+                currentComponent: 'A',
+                c: {
+                    a:1
+                }
             }
         },
         components: {
@@ -40,6 +46,10 @@
                 } else {
                     this.currentComponent = "A"
                 }
+            },
+
+            handleClick1() {
+                this.c.a++;
             }
         }
     })

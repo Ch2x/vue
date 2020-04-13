@@ -23,16 +23,16 @@ let uid = 0
  * This is used for both the $watch() api and directives.
  */
 export default class Watcher {
-  vm: Component;
-  expression: string;
-  cb: Function;
-  id: number;
+  vm: Component; // 当前实列
+  expression: string; // 更新函数
+  cb: Function; // 回调函数
+  id: number; // watcher Id
   deep: boolean;
-  user: boolean;
-  lazy: boolean;
-  sync: boolean;
+  user: boolean; // 默认false
+  lazy: boolean; // 默认false 
+  sync: boolean; // 默认false
   dirty: boolean;
-  active: boolean;
+  active: boolean; // 默认true
   deps: Array<Dep>;
   newDeps: Array<Dep>;
   depIds: SimpleSet;
@@ -135,7 +135,7 @@ export default class Watcher {
     }
   }
 
-  /**
+  /** 
    * Clean up for dependency collection.
    */
   cleanupDeps () {

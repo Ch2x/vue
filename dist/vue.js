@@ -2795,7 +2795,7 @@ function mountComponent (
       var endTag = "vue-perf-end:" + id;
 
       mark(startTag);
-      var vnode = vm._render();
+      var vnode = vm._render(); // 生成vnode
       mark(endTag);
       measure(("vue " + name + " render"), startTag, endTag);
 
@@ -3206,7 +3206,7 @@ Watcher.prototype.addDep = function addDep (dep) {
   }
 };
 
-/**
+/** 
  * Clean up for dependency collection.
  */
 Watcher.prototype.cleanupDeps = function cleanupDeps () {
@@ -4532,9 +4532,9 @@ function renderMixin (Vue) {
     var render = ref.render;
     var _parentVnode = ref._parentVnode;
 
-    // reset _rendered flag on slots for duplicate slot check
+    // reset _rendered flag on slots for duplicate slot check 
     {
-      for (var key in vm.$slots) {
+      for (var key in vm.$slots) { //用来访问被插槽分发的内容
         // $flow-disable-line
         vm.$slots[key]._rendered = false;
       }
@@ -4591,6 +4591,7 @@ function renderMixin (Vue) {
 var uid$3 = 0;
 
 function initMixin (Vue) {
+  // new Vue的时候直行
   Vue.prototype._init = function (options) {
     var vm = this;
     // a uid
@@ -4608,11 +4609,13 @@ function initMixin (Vue) {
     vm._isVue = true;
     // merge options
     if (options && options._isComponent) {
+      // 内部组件优化
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
       initInternalComponent(vm, options);
     } else {
+      // options合并
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
         options || {},
@@ -4630,7 +4633,7 @@ function initMixin (Vue) {
     initRender(vm);
     callHook(vm, 'beforeCreate');
     initInjections(vm); // resolve injections before data/props
-    initState(vm);
+    initState(vm); // 初始化state、data
     initProvide(vm); // resolve provide after data/props
     callHook(vm, 'created');
 
@@ -4975,7 +4978,6 @@ var KeepAlive = {
   },
 
   render: function render () {
-    debugger
     var slot = this.$slots.default;
     var vnode = getFirstComponentChild(slot);
     var componentOptions = vnode && vnode.componentOptions;
