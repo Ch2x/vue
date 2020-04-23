@@ -1,6 +1,6 @@
 /*!
  * Vue.js v2.5.17-beta.0
- * (c) 2014-2018 Evan You
+ * (c) 2014-2020 Evan You
  * Released under the MIT License.
  */
 /*  */
@@ -435,6 +435,12 @@ var config = ({
   mustUseProp: no,
 
   /**
+   * Perform updates asynchronously. Intended to be used by Vue Test Utils
+   * This will significantly reduce performance if set to false.
+   */
+  async: true,
+
+  /**
    * Exposed for legacy reasons
    */
   _lifecycleHooks: LIFECYCLE_HOOKS
@@ -550,7 +556,7 @@ if (typeof Set !== 'undefined' && isNative(Set)) {
   _Set = Set;
 } else {
   // a non-standard Set polyfill that only works with primitive keys.
-  _Set = (function () {
+  _Set = /*@__PURE__*/(function () {
     function Set () {
       this.set = Object.create(null);
     }
@@ -693,6 +699,12 @@ Dep.prototype.depend = function depend () {
 Dep.prototype.notify = function notify () {
   // stabilize the subscriber list first
   var subs = this.subs.slice();
+  if (process.env.NODE_ENV !== 'production' && !config.async) {
+    // subs aren't sorted in scheduler if not running async
+    // we need to sort them now to make sure they fire in correct
+    // order
+    subs.sort(function (a, b) { return a.id - b.id; });
+  }
   for (var i = 0, l = subs.length; i < l; i++) {
     subs[i].update();
   }
@@ -1629,11 +1641,10 @@ function assertProp (
       valid = assertedType.valid;
     }
   }
+
   if (!valid) {
     warn(
-      "Invalid prop: type check failed for prop \"" + name + "\"." +
-      " Expected " + (expectedTypes.map(capitalize).join(', ')) +
-      ", got " + (toRawType(value)) + ".",
+      getInvalidTypeMessage(name, value, expectedTypes),
       vm
     );
     return
@@ -1698,6 +1709,49 @@ function getTypeIndex (type, expectedTypes) {
     }
   }
   return -1
+}
+
+function getInvalidTypeMessage (name, value, expectedTypes) {
+  var message = "Invalid prop: type check failed for prop \"" + name + "\"." +
+    " Expected " + (expectedTypes.map(capitalize).join(', '));
+  var expectedType = expectedTypes[0];
+  var receivedType = toRawType(value);
+  var expectedValue = styleValue(value, expectedType);
+  var receivedValue = styleValue(value, receivedType);
+  // check if we need to specify expected value
+  if (expectedTypes.length === 1 &&
+      isExplicable(expectedType) &&
+      !isBoolean(expectedType, receivedType)) {
+    message += " with value " + expectedValue;
+  }
+  message += ", got " + receivedType + " ";
+  // check if we need to specify received value
+  if (isExplicable(receivedType)) {
+    message += "with value " + receivedValue + ".";
+  }
+  return message
+}
+
+function styleValue (value, type) {
+  if (type === 'String') {
+    return ("\"" + value + "\"")
+  } else if (type === 'Number') {
+    return ("" + (Number(value)))
+  } else {
+    return ("" + value)
+  }
+}
+
+function isExplicable (value) {
+  var explicitTypes = ['string', 'number', 'boolean'];
+  return explicitTypes.some(function (elem) { return value.toLowerCase() === elem; })
+}
+
+function isBoolean () {
+  var args = [], len = arguments.length;
+  while ( len-- ) args[ len ] = arguments[ len ];
+
+  return args.some(function (elem) { return elem.toLowerCase() === 'boolean'; })
 }
 
 /*  */
@@ -2447,12 +2501,10 @@ function updateComponentListeners (
 function eventsMixin (Vue) {
   var hookRE = /^hook:/;
   Vue.prototype.$on = function (event, fn) {
-    var this$1 = this;
-
     var vm = this;
     if (Array.isArray(event)) {
       for (var i = 0, l = event.length; i < l; i++) {
-        this$1.$on(event[i], fn);
+        this.$on(event[i], fn);
       }
     } else {
       (vm._events[event] || (vm._events[event] = [])).push(fn);
@@ -2477,8 +2529,6 @@ function eventsMixin (Vue) {
   };
 
   Vue.prototype.$off = function (event, fn) {
-    var this$1 = this;
-
     var vm = this;
     // all
     if (!arguments.length) {
@@ -2488,7 +2538,7 @@ function eventsMixin (Vue) {
     // array of events
     if (Array.isArray(event)) {
       for (var i = 0, l = event.length; i < l; i++) {
-        this$1.$off(event[i], fn);
+        this.$off(event[i], fn);
       }
       return vm
     }
@@ -2765,7 +2815,7 @@ function mountComponent (
       var endTag = "vue-perf-end:" + id;
 
       mark(startTag);
-      var vnode = vm._render();
+      var vnode = vm._render(); // 生成vnode
       mark(endTag);
       measure(("vue " + name + " render"), startTag, endTag);
 
@@ -3065,6 +3115,11 @@ function queueWatcher (watcher) {
     // queue the flush
     if (!waiting) {
       waiting = true;
+
+      if (process.env.NODE_ENV !== 'production' && !config.async) {
+        flushSchedulerQueue();
+        return
+      }
       nextTick(flushSchedulerQueue);
     }
   }
@@ -3095,16 +3150,16 @@ var Watcher = function Watcher (
   if (options) {
     this.deep = !!options.deep;
     this.user = !!options.user;
-    this.computed = !!options.computed;
+    this.lazy = !!options.lazy;
     this.sync = !!options.sync;
     this.before = options.before;
   } else {
-    this.deep = this.user = this.computed = this.sync = false;
+    this.deep = this.user = this.lazy = this.sync = false;
   }
   this.cb = cb;
   this.id = ++uid$1; // uid for batching
   this.active = true;
-  this.dirty = this.computed; // for computed watchers
+  this.dirty = this.lazy; // for lazy watchers
   this.deps = [];
   this.newDeps = [];
   this.depIds = new _Set();
@@ -3127,12 +3182,9 @@ var Watcher = function Watcher (
       );
     }
   }
-  if (this.computed) {
-    this.value = undefined;
-    this.dep = new Dep();
-  } else {
-    this.value = this.get();
-  }
+  this.value = this.lazy
+    ? undefined
+    : this.get();
 };
 
 /**
@@ -3176,17 +3228,15 @@ Watcher.prototype.addDep = function addDep (dep) {
   }
 };
 
-/**
+/** 
  * Clean up for dependency collection.
  */
 Watcher.prototype.cleanupDeps = function cleanupDeps () {
-    var this$1 = this;
-
   var i = this.deps.length;
   while (i--) {
-    var dep = this$1.deps[i];
-    if (!this$1.newDepIds.has(dep.id)) {
-      dep.removeSub(this$1);
+    var dep = this.deps[i];
+    if (!this.newDepIds.has(dep.id)) {
+      dep.removeSub(this);
     }
   }
   var tmp = this.depIds;
@@ -3204,27 +3254,9 @@ Watcher.prototype.cleanupDeps = function cleanupDeps () {
  * Will be called when a dependency changes.
  */
 Watcher.prototype.update = function update () {
-    var this$1 = this;
-
   /* istanbul ignore else */
-  if (this.computed) {
-    // A computed property watcher has two modes: lazy and activated.
-    // It initializes as lazy by default, and only becomes activated when
-    // it is depended on by at least one subscriber, which is typically
-    // another computed property or a component's render function.
-    if (this.dep.subs.length === 0) {
-      // In lazy mode, we don't want to perform computations until necessary,
-      // so we simply mark the watcher as dirty. The actual computation is
-      // performed just-in-time in this.evaluate() when the computed property
-      // is accessed.
-      this.dirty = true;
-    } else {
-      // In activated mode, we want to proactively perform the computation
-      // but only notify our subscribers when the value has indeed changed.
-      this.getAndInvoke(function () {
-        this$1.dep.notify();
-      });
-    }
+  if (this.lazy) {
+    this.dirty = true;
   } else if (this.sync) {
     this.run();
   } else {
@@ -3238,54 +3270,47 @@ Watcher.prototype.update = function update () {
  */
 Watcher.prototype.run = function run () {
   if (this.active) {
-    this.getAndInvoke(this.cb);
-  }
-};
-
-Watcher.prototype.getAndInvoke = function getAndInvoke (cb) {
-  var value = this.get();
-  if (
-    value !== this.value ||
-    // Deep watchers and watchers on Object/Arrays should fire even
-    // when the value is the same, because the value may
-    // have mutated.
-    isObject(value) ||
-    this.deep
-  ) {
-    // set new value
-    var oldValue = this.value;
-    this.value = value;
-    this.dirty = false;
-    if (this.user) {
-      try {
-        cb.call(this.vm, value, oldValue);
-      } catch (e) {
-        handleError(e, this.vm, ("callback for watcher \"" + (this.expression) + "\""));
+    var value = this.get();
+    if (
+      value !== this.value ||
+      // Deep watchers and watchers on Object/Arrays should fire even
+      // when the value is the same, because the value may
+      // have mutated.
+      isObject(value) ||
+      this.deep
+    ) {
+      // set new value
+      var oldValue = this.value;
+      this.value = value;
+      if (this.user) {
+        try {
+          this.cb.call(this.vm, value, oldValue);
+        } catch (e) {
+          handleError(e, this.vm, ("callback for watcher \"" + (this.expression) + "\""));
+        }
+      } else {
+        this.cb.call(this.vm, value, oldValue);
       }
-    } else {
-      cb.call(this.vm, value, oldValue);
     }
   }
 };
 
 /**
- * Evaluate and return the value of the watcher.
- * This only gets called for computed property watchers.
+ * Evaluate the value of the watcher.
+ * This only gets called for lazy watchers.
  */
 Watcher.prototype.evaluate = function evaluate () {
-  if (this.dirty) {
-    this.value = this.get();
-    this.dirty = false;
-  }
-  return this.value
+  this.value = this.get();
+  this.dirty = false;
 };
 
 /**
- * Depend on this watcher. Only for computed property watchers.
+ * Depend on all deps collected by this watcher.
  */
 Watcher.prototype.depend = function depend () {
-  if (this.dep && Dep.target) {
-    this.dep.depend();
+  var i = this.deps.length;
+  while (i--) {
+    this.deps[i].depend();
   }
 };
 
@@ -3293,8 +3318,6 @@ Watcher.prototype.depend = function depend () {
  * Remove self from all dependencies' subscriber list.
  */
 Watcher.prototype.teardown = function teardown () {
-    var this$1 = this;
-
   if (this.active) {
     // remove self from vm's watcher list
     // this is a somewhat expensive operation so we skip it
@@ -3304,7 +3327,7 @@ Watcher.prototype.teardown = function teardown () {
     }
     var i = this.deps.length;
     while (i--) {
-      this$1.deps[i].removeSub(this$1);
+      this.deps[i].removeSub(this);
     }
     this.active = false;
   }
@@ -3450,7 +3473,7 @@ function getData (data, vm) {
   }
 }
 
-var computedWatcherOptions = { computed: true };
+var computedWatcherOptions = { lazy: true };
 
 function initComputed (vm, computed) {
   // $flow-disable-line
@@ -3530,8 +3553,13 @@ function createComputedGetter (key) {
   return function computedGetter () {
     var watcher = this._computedWatchers && this._computedWatchers[key];
     if (watcher) {
-      watcher.depend();
-      return watcher.evaluate()
+      if (watcher.dirty) {
+        watcher.evaluate();
+      }
+      if (Dep.target) {
+        watcher.depend();
+      }
+      return watcher.value
     }
   }
 }
@@ -4548,9 +4576,9 @@ function renderMixin (Vue) {
     var render = ref.render;
     var _parentVnode = ref._parentVnode;
 
-    // reset _rendered flag on slots for duplicate slot check
+    // reset _rendered flag on slots for duplicate slot check 
     if (process.env.NODE_ENV !== 'production') {
-      for (var key in vm.$slots) {
+      for (var key in vm.$slots) { //用来访问被插槽分发的内容
         // $flow-disable-line
         vm.$slots[key]._rendered = false;
       }
@@ -4609,6 +4637,7 @@ function renderMixin (Vue) {
 var uid$3 = 0;
 
 function initMixin (Vue) {
+  // new Vue的时候直行
   Vue.prototype._init = function (options) {
     var vm = this;
     // a uid
@@ -4626,11 +4655,13 @@ function initMixin (Vue) {
     vm._isVue = true;
     // merge options
     if (options && options._isComponent) {
+      // 内部组件优化
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
       initInternalComponent(vm, options);
     } else {
+      // options合并
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
         options || {},
@@ -4650,7 +4681,7 @@ function initMixin (Vue) {
     initRender(vm);
     callHook(vm, 'beforeCreate');
     initInjections(vm); // resolve injections before data/props
-    initState(vm);
+    initState(vm); // 初始化state、data
     initProvide(vm); // resolve provide after data/props
     callHook(vm, 'created');
 
@@ -4797,11 +4828,12 @@ function initExtend (Vue) {
    * cid. This enables us to create wrapped "child
    * constructors" for prototypal inheritance and cache them.
    */
+  // prototypal inheritance 原型继承
   Vue.cid = 0;
   var cid = 1;
 
   /**
-   * Class inheritance
+   * Class inheritance 类的继承
    */
   Vue.extend = function (extendOptions) {
     extendOptions = extendOptions || {};
@@ -4811,7 +4843,7 @@ function initExtend (Vue) {
     if (cachedCtors[SuperId]) {
       return cachedCtors[SuperId]
     }
-
+    debugger
     var name = extendOptions.name || Super.options.name;
     if (process.env.NODE_ENV !== 'production' && name) {
       validateComponentName(name);
@@ -4978,10 +5010,8 @@ var KeepAlive = {
   },
 
   destroyed: function destroyed () {
-    var this$1 = this;
-
-    for (var key in this$1.cache) {
-      pruneCacheEntry(this$1.cache, key, this$1.keys);
+    for (var key in this.cache) {
+      pruneCacheEntry(this.cache, key, this.keys);
     }
   },
 
@@ -5087,9 +5117,9 @@ function initGlobalAPI (Vue) {
 
   extend(Vue.options.components, builtInComponents);
 
-  initUse(Vue);
+  initUse(Vue); // 添加Vue.use方法
   initMixin$1(Vue);
-  initExtend(Vue);
+  initExtend(Vue); // 添加Vue.extend方法
   initAssetRegisters(Vue);
 }
 
@@ -5688,7 +5718,7 @@ function createPatchFunction (backend) {
   function insert (parent, elm, ref$$1) {
     if (isDef(parent)) {
       if (isDef(ref$$1)) {
-        if (ref$$1.parentNode === parent) {
+        if (nodeOps.parentNode(ref$$1) === parent) {
           nodeOps.insertBefore(parent, elm, ref$$1);
         }
       } else {

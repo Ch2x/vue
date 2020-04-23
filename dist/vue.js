@@ -4815,11 +4815,12 @@ function initExtend (Vue) {
    * cid. This enables us to create wrapped "child
    * constructors" for prototypal inheritance and cache them.
    */
+  // prototypal inheritance 原型继承
   Vue.cid = 0;
   var cid = 1;
 
   /**
-   * Class inheritance
+   * Class inheritance 类的继承
    */
   Vue.extend = function (extendOptions) {
     extendOptions = extendOptions || {};
@@ -4829,7 +4830,7 @@ function initExtend (Vue) {
     if (cachedCtors[SuperId]) {
       return cachedCtors[SuperId]
     }
-
+    debugger
     var name = extendOptions.name || Super.options.name;
     if ("development" !== 'production' && name) {
       validateComponentName(name);
@@ -5103,9 +5104,9 @@ function initGlobalAPI (Vue) {
 
   extend(Vue.options.components, builtInComponents);
 
-  initUse(Vue);
+  initUse(Vue); // 添加Vue.use方法
   initMixin$1(Vue);
-  initExtend(Vue);
+  initExtend(Vue); // 添加Vue.extend方法
   initAssetRegisters(Vue);
 }
 

@@ -1,35 +1,17 @@
-/* @flow */
+```js
 
-import { ASSET_TYPES } from 'shared/constants'
-import { defineComputed, proxy } from '../instance/state'
-import { extend, mergeOptions, validateComponentName } from '../util/index'
-
-export function initExtend (Vue: GlobalAPI) {
-  /**
-   * Each instance constructor, including Vue, has a unique
-   * cid. This enables us to create wrapped "child
-   * constructors" for prototypal inheritance and cache them.
-   */
-  // prototypal inheritance 原型继承
-  Vue.cid = 0
-  let cid = 1
-
-  /**
-   * Class inheritance 类的继承
-   */
-  Vue.extend = function (extendOptions: Object): Function {
+Vue.extend = function (extendOptions: Object): Function {
     extendOptions = extendOptions || {}
     const Super = this
     const SuperId = Super.cid
     const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {})
+
+    // 缓存扩展   
     if (cachedCtors[SuperId]) {
       return cachedCtors[SuperId]
     }
 
     const name = extendOptions.name || Super.options.name
-    if (process.env.NODE_ENV !== 'production' && name) {
-      validateComponentName(name)
-    }
 
     const Sub = function VueComponent (options) {
       this._init(options)
@@ -56,10 +38,15 @@ export function initExtend (Vue: GlobalAPI) {
     // allow further extension/mixin/plugin usage 允许进一步扩展/混合/插件使用
     Sub.extend = Super.extend // 新生成的子类可以被继承
     Sub.mixin = Super.mixin
-    Sub.use = Super.use
+    Sub.use = Super.use 
 
     // create asset registers, so extended classes
     // can have their private assets too.
+    // ASSET_TYPES = [
+    // 'component',
+    // 'directive',
+    // 'filter'
+    // ]
     ASSET_TYPES.forEach(function (type) {
       Sub[type] = Super[type]
     })
@@ -81,16 +68,4 @@ export function initExtend (Vue: GlobalAPI) {
   }
 }
 
-function initProps (Comp) {
-  const props = Comp.options.props
-  for (const key in props) {
-    proxy(Comp.prototype, `_props`, key)
-  }
-}
-
-function initComputed (Comp) {
-  const computed = Comp.options.computed
-  for (const key in computed) {
-    defineComputed(Comp.prototype, key, computed[key])
-  }
-}
+```
